@@ -342,7 +342,115 @@
   }
 }
 
-/* ================= 6. Responsive Breakpoints ================= */
+/* ================= 6. Status Boxes (Loading, Error, Empty) ================= */
+.dashboard-status-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.loading-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #059669;
+}
+
+@media (prefers-color-scheme: dark) {
+  .loading-box {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+  }
+}
+
+.status-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(16, 185, 129, 0.25);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-box {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+  justify-content: space-between;
+}
+
+@media (prefers-color-scheme: dark) {
+  .error-box {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+  }
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-title {
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+}
+
+.error-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  opacity: 0.9;
+}
+
+.retry-btn {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.retry-btn:hover {
+  background: #b91c1c;
+}
+
+.empty-box {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed var(--border, #cbd5e1);
+  color: var(--text, #64748b);
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .empty-box {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #334155;
+  }
+}
+
+/* ================= 7. Responsive Breakpoints ================= */
 
 /* Tablet view */
 @media (max-width: 900px) {

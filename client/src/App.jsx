@@ -7,17 +7,29 @@ import "./App.css";
 function App() {
   const [activeTab, setActiveTab] = useState("inventory");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleAddItem = () => {
+    setEditingItem(null);
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditItem = (item) => {
+    setEditingItem(item);
     setIsAddModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
+    setEditingItem(null);
   };
 
-  const handleGroceryAdded = () => {
+  const handleGrocerySaved = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleGroceryDeleted = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
@@ -31,13 +43,19 @@ function App() {
       />
 
       <main className="main-content">
-        <Dashboard refreshKey={refreshKey} />
+        <Dashboard
+          refreshKey={refreshKey}
+          onEdit={handleEditItem}
+          onDeleteSuccess={handleGroceryDeleted}
+        />
       </main>
 
       <AddGroceryForm
+        key={isAddModalOpen ? (editingItem?._id || "new-item-form") : "closed-form"}
         isOpen={isAddModalOpen}
         onClose={handleCloseModal}
-        onSuccess={handleGroceryAdded}
+        onSuccess={handleGrocerySaved}
+        itemToEdit={editingItem}
       />
     </div>
   );

@@ -39,10 +39,57 @@ const initialFormState = {
   expiryDate: "",
 };
 
-export default function AddGroceryForm({ isOpen, onClose, onSuccess }) {
-  const [formData, setFormData] = useState(initialFormState);
+// Helper to format ISO date string or Date object into YYYY-MM-DD for <input type="date">
+const formatDateForInput = (dateVal) => {
+  if (!dateVal) return "";
+  if (typeof dateVal === "string" && dateVal.includes("T")) {
+    return dateVal.split("T")[0];
+  }
+  if (typeof dateVal === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+    return dateVal;
+  }
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().split("T")[0];
+  } catch {
+    return "";
+  }
+};
+
+export default function AddGroceryForm({
+  isOpen,
+  onClose,
+  onSuccess,
+  itemToEdit = null,
+}) {
+  const isEdit = Boolean(itemToEdit && itemToEdit._id);
+
+  const getFormDataFromItem = (item) => {
+    if (!item) return initialFormState;
+    return {
+      name: item.name || "",
+      category: item.category || "",
+      quantity:
+        item.quantity !== undefined && item.quantity !== null
+          ? item.quantity
+          : "",
+      unit: item.unit || "pcs",
+      expiryDate: formatDateForInput(item.expiryDate),
+    };
+  };
+
+  const [formData, setFormData] = useState(() => getFormDataFromItem(itemToEdit));
+  const [prevItemToEdit, setPrevItemToEdit] = useState(itemToEdit);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Sync form data when switching between items or add/edit modes
+  if (itemToEdit !== prevItemToEdit) {
+    setPrevItemToEdit(itemToEdit);
+    setFormData(getFormDataFromItem(itemToEdit));
+    setError(null);
+  }
 
   const resetForm = useCallback(() => {
     setFormData(initialFormState);
@@ -113,6 +160,11 @@ export default function AddGroceryForm({ isOpen, onClose, onSuccess }) {
       return;
     }
 
+    if (isEdit && !itemToEdit._id) {
+      setError("Invalid grocery identifier. Cannot update item.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -124,19 +176,28 @@ export default function AddGroceryForm({ isOpen, onClose, onSuccess }) {
       expiryDate: formData.expiryDate,
     };
 
+    const url = isEdit
+      ? `http://localhost:5000/api/groceries/${itemToEdit._id}`
+      : "http://localhost:5000/api/groceries";
+    const method = isEdit ? "PUT" : "POST";
+
     try {
-      const response = await fetch("http://localhost:5000/api/groceries", {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || "Failed to add grocery item.");
+        throw new Error(
+          data.message ||
+            data.error ||
+            (isEdit ? "Failed to update grocery item." : "Failed to add grocery item.")
+        );
       }
 
       // Success: reset form, notify parent, close modal
@@ -169,24 +230,41 @@ export default function AddGroceryForm({ isOpen, onClose, onSuccess }) {
         <div className="modal-header">
           <div className="modal-header-text">
             <div className="modal-badge">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="badge-icon"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              <span>New Item</span>
+              {isEdit ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="badge-icon"
+                >
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              ) : (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="badge-icon"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              )}
+              <span>{isEdit ? "Edit Item" : "New Item"}</span>
             </div>
             <h2 id="add-grocery-title" className="modal-title">
-              Add to Pantry
+              {isEdit ? "Edit Grocery" : "Add to Pantry"}
             </h2>
             <p className="modal-subtitle">
-              Fill in the item details to track stock and freshness.
+              {isEdit
+                ? "Update the item details to keep your pantry accurate."
+                : "Fill in the item details to track stock and freshness."}
             </p>
           </div>
 
@@ -366,7 +444,7 @@ export default function AddGroceryForm({ isOpen, onClose, onSuccess }) {
               {loading ? (
                 <>
                   <span className="btn-spinner" aria-hidden="true"></span>
-                  <span>Adding Item...</span>
+                  <span>{isEdit ? "Saving Changes..." : "Adding Item..."}</span>
                 </>
               ) : (
                 <>
@@ -381,7 +459,7 @@ export default function AddGroceryForm({ isOpen, onClose, onSuccess }) {
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  <span>Add Grocery</span>
+                  <span>{isEdit ? "Save Changes" : "Add Grocery"}</span>
                 </>
               )}
             </button>

@@ -145,6 +145,10 @@
   gap: 1rem;
 }
 
+.groceries-header-info {
+  flex: 1;
+}
+
 .groceries-title {
   font-size: 1.35rem;
   font-weight: 700;
@@ -156,6 +160,100 @@
   font-size: 0.9rem;
   color: var(--text, #64748b);
   margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  line-height: 1.2;
+}
+
+@media (prefers-color-scheme: dark) {
+  .filter-chip {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+}
+
+/* Groceries Controls & Category Filter */
+.groceries-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.category-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #64748b);
+  white-space: nowrap;
+}
+
+.category-filter-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.category-filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg, #ffffff);
+  border: 1.5px solid var(--border, #cbd5e1);
+  color: var(--text-h, #0f172a);
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.45rem 2.1rem 0.45rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.category-filter-select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .category-filter-select {
+    background: #1a1c24;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+
+  .category-filter-select:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+}
+
+.filter-select-arrow {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text, #94a3b8);
+  pointer-events: none;
 }
 
 .view-all-btn {
@@ -181,6 +279,32 @@
 .view-all-btn:hover {
   background: #10b981;
   color: #ffffff;
+}
+
+.clear-filter-btn {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+}
+
+.clear-filter-btn:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  .clear-filter-btn {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+  }
+
+  .clear-filter-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+  }
 }
 
 /* ================= 4. Responsive Table ================= */
@@ -596,6 +720,56 @@
   }
 }
 
+.filter-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 3rem 1.5rem;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1.5px dashed var(--border, #cbd5e1);
+  border-radius: 12px;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .filter-empty-box {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #334155;
+  }
+}
+
+.empty-filter-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.empty-filter-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-h, #0f172a);
+  margin: 0;
+}
+
+.empty-filter-desc {
+  font-size: 0.92rem;
+  color: var(--text, #64748b);
+  max-width: 440px;
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+}
+
+.reset-filter-action-btn {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.reset-filter-action-btn:hover {
+  background: #059669;
+}
+
 /* ================= 7. Responsive Breakpoints ================= */
 
 /* Tablet view */
@@ -636,10 +810,29 @@
   .groceries-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .groceries-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .category-filter-group {
+    flex: 1;
+  }
+
+  .category-filter-wrapper {
+    flex: 1;
+    width: 100%;
+  }
+
+  .category-filter-select {
+    width: 100%;
   }
 
   .view-all-btn {
-    align-self: flex-start;
+    align-self: auto;
   }
 
   .groceries-table th,

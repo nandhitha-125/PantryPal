@@ -1,13 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "./Dashboard.css";
 
-export default function Dashboard({ refreshKey = 0, onEdit, onDeleteSuccess }) {
+export default function Dashboard({
+  refreshKey = 0,
+  searchQuery = "",
+  onSearchChange,
+  onEdit,
+  onDeleteSuccess,
+}) {
   // 1. State for groceries, loading status, and error messages
   const [groceries, setGroceries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [actionError, setActionError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
 
   // 2. Fetch groceries from Express API
   const fetchGroceries = () => {
@@ -64,7 +71,53 @@ export default function Dashboard({ refreshKey = 0, onEdit, onDeleteSuccess }) {
     };
   }, [refreshKey]);
 
-  // 4. Handle Delete grocery item
+  // 4. Extract unique categories present in the grocery data
+  const availableCategories = useMemo(() => {
+    const categoriesSet = new Set();
+    groceries.forEach((item) => {
+      if (item.category && item.category.trim()) {
+        categoriesSet.add(item.category.trim());
+      }
+    });
+    return [
+      "All Categories",
+      ...Array.from(categoriesSet).sort((a, b) => a.localeCompare(b)),
+    ];
+  }, [groceries]);
+
+  // Fall back to "All Categories" if selected category is no longer present in inventory
+  const activeCategory = availableCategories.includes(selectedCategory)
+    ? selectedCategory
+    : "All Categories";
+
+  // 5. Combined filtering: case-insensitive search by name + category filter
+  const filteredGroceries = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return groceries.filter((item) => {
+      const matchesSearch = query
+        ? (item.name || "").toLowerCase().includes(query)
+        : true;
+      const matchesCategory =
+        activeCategory === "All Categories"
+          ? true
+          : (item.category || "").trim().toLowerCase() ===
+            activeCategory.toLowerCase();
+      return matchesSearch && matchesCategory;
+    });
+  }, [groceries, searchQuery, activeCategory]);
+
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() || activeCategory !== "All Categories"
+  );
+
+  const handleClearFilters = () => {
+    setSelectedCategory("All Categories");
+    if (onSearchChange) {
+      onSearchChange("");
+    }
+  };
+
+  // 6. Handle Delete grocery item
   const handleDeleteItem = async (item) => {
     if (!item || !item._id) {
       setActionError("Invalid grocery identifier. Cannot delete item.");
@@ -105,7 +158,7 @@ export default function Dashboard({ refreshKey = 0, onEdit, onDeleteSuccess }) {
     }
   };
 
-  // 5. Calculate Summary Metrics from the live groceries array
+  // 7. Calculate Summary Metrics from the FULL live groceries array (preserves actual inventory totals)
   const totalItems = groceries.length;
 
   const totalCategories = new Set(
@@ -208,21 +261,80 @@ export default function Dashboard({ refreshKey = 0, onEdit, onDeleteSuccess }) {
       {/* 3. Your Groceries Section */}
       <section className="groceries-section" aria-labelledby="groceries-heading">
         <div className="groceries-header">
-          <div>
+          <div className="groceries-header-info">
             <h2 id="groceries-heading" className="groceries-title">
               Your Groceries
             </h2>
             <p className="groceries-subtitle">
-              Current ingredients and expiry tracking
+              {hasActiveFilters ? (
+                <>
+                  Showing <strong>{filteredGroceries.length}</strong> of {totalItems}{" "}
+                  {totalItems === 1 ? "item" : "items"}
+                  {searchQuery.trim() && (
+                    <span className="filter-chip">
+                      Search: &ldquo;{searchQuery.trim()}&rdquo;
+                    </span>
+                  )}
+                  {activeCategory !== "All Categories" && (
+                    <span className="filter-chip">
+                      Category: {activeCategory}
+                    </span>
+                  )}
+                </>
+              ) : (
+                "Current ingredients and expiry tracking"
+              )}
             </p>
           </div>
-          <button
-            type="button"
-            className="view-all-btn"
-            aria-label="View all grocery items"
-          >
-            View All
-          </button>
+
+          <div className="groceries-controls">
+            {/* Category Filter Dropdown */}
+            <div className="category-filter-group">
+              <label htmlFor="category-filter-select" className="filter-label">
+                Category:
+              </label>
+              <div className="category-filter-wrapper">
+                <select
+                  id="category-filter-select"
+                  className="category-filter-select"
+                  value={activeCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  aria-label="Filter groceries by category"
+                >
+                  {availableCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+                <span className="filter-select-arrow" aria-hidden="true">
+                  ▾
+                </span>
+              </div>
+            </div>
+
+            {/* Clear Filters / View All Button */}
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                className="view-all-btn clear-filter-btn"
+                onClick={handleClearFilters}
+                aria-label="Clear active search and category filters"
+                title="Reset search and category filters"
+              >
+                Clear Filters
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="view-all-btn"
+                onClick={handleClearFilters}
+                aria-label="View all grocery items"
+              >
+                View All
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Action Error Banner (e.g. Delete failure) */}
@@ -275,15 +387,36 @@ export default function Dashboard({ refreshKey = 0, onEdit, onDeleteSuccess }) {
           </div>
         )}
 
-        {/* Empty State Message */}
+        {/* Empty State: Pantry is completely empty */}
         {!loading && !error && groceries.length === 0 && (
           <div className="dashboard-status-box empty-box">
             <p>No groceries found in your pantry yet. Add some items to get started!</p>
           </div>
         )}
 
+        {/* Empty State: Filter or search produced no results */}
+        {!loading && !error && groceries.length > 0 && filteredGroceries.length === 0 && (
+          <div className="dashboard-status-box empty-box filter-empty-box" role="status">
+            <div className="empty-filter-icon" aria-hidden="true">
+              🔍
+            </div>
+            <p className="empty-filter-title">No groceries found</p>
+            <p className="empty-filter-desc">
+              No items match your current search or category filter. Try changing your search query or selecting another category.
+            </p>
+            <button
+              type="button"
+              className="retry-btn reset-filter-action-btn"
+              onClick={handleClearFilters}
+              aria-label="Clear search and category filters"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+
         {/* Live Groceries Table */}
-        {!loading && !error && groceries.length > 0 && (
+        {!loading && !error && filteredGroceries.length > 0 && (
           <div className="table-responsive">
             <table className="groceries-table">
               <thead>
@@ -297,7 +430,7 @@ export default function Dashboard({ refreshKey = 0, onEdit, onDeleteSuccess }) {
                 </tr>
               </thead>
               <tbody>
-                {groceries.map((item) => {
+                {filteredGroceries.map((item) => {
                   const statusInfo = getExpiryStatus(item.expiryDate);
                   const isDeleting = deletingId === item._id;
 

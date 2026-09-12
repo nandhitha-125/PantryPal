@@ -9,6 +9,7 @@ function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddItem = () => {
     setEditingItem(null);
@@ -39,12 +40,16 @@ function App() {
         activeTab={activeTab}
         onTabChange={(tab) => setActiveTab(tab)}
         onAddItem={handleAddItem}
+        onSearch={setSearchQuery}
+        searchQuery={searchQuery}
         expiringCount={3}
       />
 
       <main className="main-content">
         <Dashboard
           refreshKey={refreshKey}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           onEdit={handleEditItem}
           onDeleteSuccess={handleGroceryDeleted}
         />

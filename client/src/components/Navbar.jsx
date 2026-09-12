@@ -6,11 +6,14 @@ export default function Navbar({
   onTabChange,
   onAddItem,
   onSearch,
+  searchQuery = "",
   expiringCount = 3,
   notificationsCount = 2,
 }) {
   const [currentTab, setCurrentTab] = useState(activeTab);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const isControlled = onSearch !== undefined;
+  const currentSearch = isControlled ? searchQuery : internalSearchQuery;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -37,14 +40,18 @@ export default function Navbar({
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
-    setSearchQuery(query);
+    if (!isControlled) {
+      setInternalSearchQuery(query);
+    }
     if (onSearch) {
       onSearch(query);
     }
   };
 
   const clearSearch = () => {
-    setSearchQuery("");
+    if (!isControlled) {
+      setInternalSearchQuery("");
+    }
     if (onSearch) {
       onSearch("");
     }
@@ -117,11 +124,11 @@ export default function Navbar({
             <input
               type="text"
               placeholder="Search groceries, ingredients..."
-              value={searchQuery}
+              value={currentSearch}
               onChange={handleSearchChange}
               aria-label="Search pantry items"
             />
-            {searchQuery ? (
+            {currentSearch ? (
               <button
                 className="search-clear-btn"
                 onClick={clearSearch}
@@ -335,7 +342,7 @@ export default function Navbar({
             <input
               type="text"
               placeholder="Search groceries..."
-              value={searchQuery}
+              value={currentSearch}
               onChange={handleSearchChange}
             />
           </div>

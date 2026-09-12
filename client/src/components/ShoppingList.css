@@ -1,0 +1,575 @@
+/* ShoppingList.css - PantryPal Shopping List Component Styles */
+
+.shopping-container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* ================= 1. Header Section ================= */
+.shopping-header {
+  margin-bottom: 2rem;
+}
+
+.shopping-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.shopping-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-h, #0f172a);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.shopping-subtitle {
+  font-size: 1.05rem;
+  color: var(--text, #64748b);
+  margin: 0;
+}
+
+.back-to-inventory-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1.5px solid var(--border, #cbd5e1);
+  color: var(--text, #475569);
+  padding: 0.45rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-to-inventory-btn:hover {
+  border-color: #10b981;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .back-to-inventory-btn {
+    border-color: #334155;
+    color: #94a3b8;
+  }
+
+  .back-to-inventory-btn:hover {
+    border-color: #10b981;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+  }
+}
+
+/* ================= 2. Add Item Card ================= */
+.shopping-add-card {
+  background: var(--bg, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+@media (prefers-color-scheme: dark) {
+  .shopping-add-card {
+    background: #1a1c24;
+    border-color: #2e313d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.shopping-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.form-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-h, #0f172a);
+}
+
+.form-inputs-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.item-name-input {
+  flex: 2;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--border, #cbd5e1);
+  font-size: 0.95rem;
+  background: var(--bg, #ffffff);
+  color: var(--text-h, #0f172a);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.item-name-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.item-qty-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--border, #cbd5e1);
+  font-size: 0.95rem;
+  background: var(--bg, #ffffff);
+  color: var(--text-h, #0f172a);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.item-qty-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .item-name-input,
+  .item-qty-input {
+    background: #121319;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+
+  .item-name-input:focus,
+  .item-qty-input:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.add-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Quick Add Chips */
+.quick-add-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text, #64748b);
+  margin-top: 0.25rem;
+}
+
+.quick-add-label {
+  font-weight: 500;
+}
+
+.quick-chip {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #059669;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-chip:hover {
+  background: #10b981;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .quick-chip {
+    background: rgba(16, 185, 129, 0.16);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+
+  .quick-chip:hover {
+    background: #10b981;
+    color: #ffffff;
+  }
+}
+
+/* ================= 3. List Controls & Metrics ================= */
+.shopping-list-card {
+  background: var(--bg, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+@media (prefers-color-scheme: dark) {
+  .shopping-list-card {
+    background: #1a1c24;
+    border-color: #2e313d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  margin-bottom: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .list-toolbar {
+    border-color: #2e313d;
+  }
+}
+
+.list-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-h, #0f172a);
+}
+
+.count-highlight {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .count-highlight {
+    background: rgba(16, 185, 129, 0.22);
+    color: #34d399;
+  }
+}
+
+.clear-completed-btn {
+  background: transparent;
+  border: 1.5px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.38rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-completed-btn:hover:not(:disabled) {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.clear-completed-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--border, #cbd5e1);
+  color: var(--text, #94a3b8);
+}
+
+@media (prefers-color-scheme: dark) {
+  .clear-completed-btn {
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+  }
+
+  .clear-completed-btn:hover:not(:disabled) {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+  }
+
+  .clear-completed-btn:disabled {
+    border-color: #334155;
+    color: #64748b;
+  }
+}
+
+/* ================= 4. Shopping Items List ================= */
+.shopping-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.shopping-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  gap: 1rem;
+}
+
+.shopping-item-row:hover {
+  background: rgba(16, 185, 129, 0.03);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateX(2px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .shopping-item-row {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #2e313d;
+  }
+
+  .shopping-item-row:hover {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+}
+
+/* Completed item styling: strikethrough & dimmed */
+.shopping-item-row.completed {
+  opacity: 0.65;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.shopping-item-row.completed:hover {
+  opacity: 0.85;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Custom Checkbox */
+.item-checkbox-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.item-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border, #94a3b8);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  margin: 0;
+  background: transparent;
+  display: grid;
+  place-content: center;
+}
+
+.item-checkbox:hover {
+  border-color: #10b981;
+}
+
+.item-checkbox:checked {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.item-checkbox:checked::before {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.item-details {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-h, #0f172a);
+  word-break: break-word;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.shopping-item-row.completed .item-name {
+  text-decoration: line-through;
+  color: var(--text, #64748b);
+}
+
+.item-quantity-pill {
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text, #475569);
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .item-quantity-pill {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+  }
+}
+
+.item-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text, #94a3b8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.item-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+  transform: scale(1.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .item-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+}
+
+/* ================= 5. Empty State ================= */
+.shopping-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3.5rem 1.5rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1.5px dashed var(--border, #cbd5e1);
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shopping-empty-box {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #334155;
+  }
+}
+
+.empty-icon {
+  font-size: 2.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-h, #0f172a);
+  margin: 0;
+}
+
+.empty-desc {
+  font-size: 0.95rem;
+  color: var(--text, #64748b);
+  max-width: 440px;
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+}
+
+/* ================= 6. Responsive Breakpoints ================= */
+@media (max-width: 640px) {
+  .shopping-container {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .form-inputs-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .item-name-input,
+  .item-qty-input,
+  .add-btn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .add-btn {
+    justify-content: center;
+  }
+
+  .list-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .clear-completed-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

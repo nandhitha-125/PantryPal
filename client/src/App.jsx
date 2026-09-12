@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
+import RecipeIdeas from "./components/RecipeIdeas";
+import ShoppingList from "./components/ShoppingList";
 import AddGroceryForm from "./components/AddGroceryForm";
 import "./App.css";
 
@@ -51,16 +53,22 @@ function App() {
       />
 
       <main className="main-content">
-        <Dashboard
-          refreshKey={refreshKey}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onExpiringCountChange={handleExpiringCountChange}
-          onEdit={handleEditItem}
-          onDeleteSuccess={handleGroceryDeleted}
-        />
+        {activeTab === "recipes" ? (
+          <RecipeIdeas onTabChange={setActiveTab} />
+        ) : activeTab === "shopping" ? (
+          <ShoppingList onTabChange={setActiveTab} />
+        ) : (
+          <Dashboard
+            refreshKey={refreshKey}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onExpiringCountChange={handleExpiringCountChange}
+            onEdit={handleEditItem}
+            onDeleteSuccess={handleGroceryDeleted}
+          />
+        )}
       </main>
 
       <AddGroceryForm

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
 import AddGroceryForm from "./components/AddGroceryForm";
@@ -10,6 +10,7 @@ function App() {
   const [editingItem, setEditingItem] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expiringCount, setExpiringCount] = useState(0);
 
   const handleAddItem = () => {
     setEditingItem(null);
@@ -34,6 +35,10 @@ function App() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleExpiringCountChange = useCallback((count) => {
+    setExpiringCount(count);
+  }, []);
+
   return (
     <div className="app-container">
       <Navbar
@@ -42,7 +47,7 @@ function App() {
         onAddItem={handleAddItem}
         onSearch={setSearchQuery}
         searchQuery={searchQuery}
-        expiringCount={3}
+        expiringCount={expiringCount}
       />
 
       <main className="main-content">
@@ -50,6 +55,9 @@ function App() {
           refreshKey={refreshKey}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onExpiringCountChange={handleExpiringCountChange}
           onEdit={handleEditItem}
           onDeleteSuccess={handleGroceryDeleted}
         />

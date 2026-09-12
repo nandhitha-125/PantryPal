@@ -1,10 +1,48 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import "./Dashboard.css";
+
+// Helper to determine expiry badge status and label
+const getExpiryStatus = (expiryDateString) => {
+  if (!expiryDateString) {
+    return { status: "fresh", label: "Fresh" };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const expiry = new Date(expiryDateString);
+  if (isNaN(expiry.getTime())) {
+    return { status: "fresh", label: "Fresh" };
+  }
+  expiry.setHours(0, 0, 0, 0);
+
+  const diffTime = expiry.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return { status: "urgent", label: "Expired" };
+  } else if (diffDays === 0) {
+    return { status: "urgent", label: "Expires Today" };
+  } else if (diffDays <= 3) {
+    return { status: "expiring", label: `${diffDays}d left` };
+  } else {
+    return { status: "fresh", label: "Fresh" };
+  }
+};
+
+// Check if a grocery item is expired or expiring within the next 3 days
+const isExpiringSoon = (expiryDateString) => {
+  const { status } = getExpiryStatus(expiryDateString);
+  return status === "urgent" || status === "expiring";
+};
 
 export default function Dashboard({
   refreshKey = 0,
   searchQuery = "",
   onSearchChange,
+  activeTab = "inventory",
+  onTabChange,
+  onExpiringCountChange,
   onEdit,
   onDeleteSuccess,
 }) {
@@ -15,6 +53,19 @@ export default function Dashboard({
   const [deletingId, setDeletingId] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+  const isExpiringFilterActive = activeTab === "expiring";
+
+  // Notify parent component (Navbar) of the real expiring count using actual grocery data
+  const updateExpiringCount = useCallback(
+    (items) => {
+      if (onExpiringCountChange) {
+        const count = items.filter((item) => isExpiringSoon(item.expiryDate)).length;
+        onExpiringCountChange(count);
+      }
+    },
+    [onExpiringCountChange]
+  );
 
   // 2. Fetch groceries from Express API
   const fetchGroceries = () => {
@@ -31,6 +82,7 @@ export default function Dashboard({
       .then((data) => {
         setGroceries(data);
         setLoading(false);
+        updateExpiringCount(data);
       })
       .catch((err) => {
         setError(
@@ -55,6 +107,7 @@ export default function Dashboard({
         if (isMounted) {
           setGroceries(data);
           setLoading(false);
+          updateExpiringCount(data);
         }
       })
       .catch((err) => {
@@ -69,7 +122,7 @@ export default function Dashboard({
     return () => {
       isMounted = false;
     };
-  }, [refreshKey]);
+  }, [refreshKey, updateExpiringCount]);
 
   // 4. Extract unique categories present in the grocery data
   const availableCategories = useMemo(() => {
@@ -90,7 +143,7 @@ export default function Dashboard({
     ? selectedCategory
     : "All Categories";
 
-  // 5. Combined filtering: case-insensitive search by name + category filter
+  // 5. Combined filtering: case-insensitive search by name + category filter + expiring soon filter
   const filteredGroceries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return groceries.filter((item) => {
@@ -102,18 +155,25 @@ export default function Dashboard({
           ? true
           : (item.category || "").trim().toLowerCase() ===
             activeCategory.toLowerCase();
-      return matchesSearch && matchesCategory;
+      const matchesExpiry = isExpiringFilterActive
+        ? isExpiringSoon(item.expiryDate)
+        : true;
+
+      return matchesSearch && matchesCategory && matchesExpiry;
     });
-  }, [groceries, searchQuery, activeCategory]);
+  }, [groceries, searchQuery, activeCategory, isExpiringFilterActive]);
 
   const hasActiveFilters = Boolean(
-    searchQuery.trim() || activeCategory !== "All Categories"
+    searchQuery.trim() || activeCategory !== "All Categories" || isExpiringFilterActive
   );
 
   const handleClearFilters = () => {
     setSelectedCategory("All Categories");
     if (onSearchChange) {
       onSearchChange("");
+    }
+    if (onTabChange) {
+      onTabChange("inventory");
     }
   };
 
@@ -165,44 +225,11 @@ export default function Dashboard({
     groceries.map((item) => item.category?.trim()).filter(Boolean)
   ).size;
 
-  // Calculate items expiring within the next 3 days
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const threeDaysFromNow = new Date(startOfToday);
-  threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-  threeDaysFromNow.setHours(23, 59, 59, 999);
-
-  const expiringSoonCount = groceries.filter((item) => {
-    if (!item.expiryDate) return false;
-    const expiry = new Date(item.expiryDate);
-    return expiry <= threeDaysFromNow;
-  }).length;
-
-  // Helper to determine expiry badge color and label
-  const getExpiryStatus = (expiryDateString) => {
-    if (!expiryDateString) {
-      return { status: "fresh", label: "Fresh" };
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const expiry = new Date(expiryDateString);
-    expiry.setHours(0, 0, 0, 0);
-
-    const diffTime = expiry.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return { status: "urgent", label: "Expired" };
-    } else if (diffDays === 0) {
-      return { status: "urgent", label: "Expires Today" };
-    } else if (diffDays <= 3) {
-      return { status: "expiring", label: `${diffDays}d left` };
-    } else {
-      return { status: "fresh", label: "Fresh" };
-    }
-  };
+  // Calculate items expiring within the next 3 days using the unified expiry logic
+  const expiringSoonCount = useMemo(
+    () => groceries.filter((item) => isExpiringSoon(item.expiryDate)).length,
+    [groceries]
+  );
 
   // Helper to format date cleanly (e.g., "Sep 15")
   const formatExpiryDate = (dateString) => {
@@ -237,12 +264,41 @@ export default function Dashboard({
           </div>
         </div>
 
-        <div className="summary-card warning-card">
+        <div
+          className={`summary-card warning-card clickable-card ${
+            isExpiringFilterActive ? "active-filter-card" : ""
+          }`}
+          onClick={() =>
+            onTabChange &&
+            onTabChange(isExpiringFilterActive ? "inventory" : "expiring")
+          }
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onTabChange &&
+                onTabChange(isExpiringFilterActive ? "inventory" : "expiring");
+            }
+          }}
+          aria-label={
+            isExpiringFilterActive
+              ? "Expiring Soon filter active. Click to view all inventory"
+              : "Click to filter inventory by items expiring soon"
+          }
+          title={
+            isExpiringFilterActive
+              ? "Expiring Soon filter active (click to show all)"
+              : "Click to filter items expiring soon"
+          }
+        >
           <div className="summary-icon warning-icon" aria-hidden="true">
             ⚠️
           </div>
           <div className="summary-content">
-            <span className="summary-label">Expiring Soon</span>
+            <span className="summary-label">
+              Expiring Soon {isExpiringFilterActive ? "• Active" : ""}
+            </span>
             <span className="summary-value warning-text">{expiringSoonCount}</span>
           </div>
         </div>
@@ -270,15 +326,47 @@ export default function Dashboard({
                 <>
                   Showing <strong>{filteredGroceries.length}</strong> of {totalItems}{" "}
                   {totalItems === 1 ? "item" : "items"}
+                  {isExpiringFilterActive && (
+                    <button
+                      type="button"
+                      className="filter-chip filter-chip-warning"
+                      onClick={() => onTabChange && onTabChange("inventory")}
+                      title="Remove expiring soon filter"
+                      aria-label="Remove expiring soon filter"
+                    >
+                      <span>⚠️ Expiring Soon</span>
+                      <span className="filter-chip-remove" aria-hidden="true">
+                        ×
+                      </span>
+                    </button>
+                  )}
                   {searchQuery.trim() && (
-                    <span className="filter-chip">
-                      Search: &ldquo;{searchQuery.trim()}&rdquo;
-                    </span>
+                    <button
+                      type="button"
+                      className="filter-chip"
+                      onClick={() => onSearchChange && onSearchChange("")}
+                      title="Remove search filter"
+                      aria-label="Remove search filter"
+                    >
+                      <span>Search: &ldquo;{searchQuery.trim()}&rdquo;</span>
+                      <span className="filter-chip-remove" aria-hidden="true">
+                        ×
+                      </span>
+                    </button>
                   )}
                   {activeCategory !== "All Categories" && (
-                    <span className="filter-chip">
-                      Category: {activeCategory}
-                    </span>
+                    <button
+                      type="button"
+                      className="filter-chip"
+                      onClick={() => setSelectedCategory("All Categories")}
+                      title="Remove category filter"
+                      aria-label="Remove category filter"
+                    >
+                      <span>Category: {activeCategory}</span>
+                      <span className="filter-chip-remove" aria-hidden="true">
+                        ×
+                      </span>
+                    </button>
                   )}
                 </>
               ) : (
@@ -319,8 +407,8 @@ export default function Dashboard({
                 type="button"
                 className="view-all-btn clear-filter-btn"
                 onClick={handleClearFilters}
-                aria-label="Clear active search and category filters"
-                title="Reset search and category filters"
+                aria-label="Clear active search, category, and expiry filters"
+                title="Reset all active filters"
               >
                 Clear Filters
               </button>
@@ -398,19 +486,27 @@ export default function Dashboard({
         {!loading && !error && groceries.length > 0 && filteredGroceries.length === 0 && (
           <div className="dashboard-status-box empty-box filter-empty-box" role="status">
             <div className="empty-filter-icon" aria-hidden="true">
-              🔍
+              {isExpiringFilterActive ? "🎉" : "🔍"}
             </div>
-            <p className="empty-filter-title">No groceries found</p>
+            <p className="empty-filter-title">
+              {isExpiringFilterActive
+                ? "No groceries expiring soon"
+                : "No groceries found"}
+            </p>
             <p className="empty-filter-desc">
-              No items match your current search or category filter. Try changing your search query or selecting another category.
+              {isExpiringFilterActive
+                ? searchQuery.trim() || activeCategory !== "All Categories"
+                  ? "No expiring groceries match your current search or category filter. Try clearing filters to view all pantry items."
+                  : "Great news! None of your pantry items are expired or expiring within the next 3 days."
+                : "No items match your current search or category filter. Try changing your search query or selecting another category."}
             </p>
             <button
               type="button"
               className="retry-btn reset-filter-action-btn"
               onClick={handleClearFilters}
-              aria-label="Clear search and category filters"
+              aria-label="Clear all filters and view inventory"
             >
-              Clear Filters
+              {isExpiringFilterActive ? "View All Groceries" : "Clear Filters"}
             </button>
           </div>
         )}

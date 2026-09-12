@@ -7,10 +7,11 @@ export default function Navbar({
   onAddItem,
   onSearch,
   searchQuery = "",
-  expiringCount = 3,
+  expiringCount = 0,
   notificationsCount = 2,
 }) {
   const [currentTab, setCurrentTab] = useState(activeTab);
+  const selectedTab = onTabChange !== undefined ? activeTab : currentTab;
   const [internalSearchQuery, setInternalSearchQuery] = useState("");
   const isControlled = onSearch !== undefined;
   const currentSearch = isControlled ? searchQuery : internalSearchQuery;
@@ -145,7 +146,7 @@ export default function Navbar({
         {/* Desktop Navigation Links */}
         <div className="navbar-links">
           {navItems.map((item) => {
-            const isActive = currentTab === item.id;
+            const isActive = selectedTab === item.id;
             return (
               <button
                 key={item.id}
@@ -353,7 +354,7 @@ export default function Navbar({
               <button
                 key={item.id}
                 className={`mobile-nav-item ${
-                  currentTab === item.id ? "active" : ""
+                  selectedTab === item.id ? "active" : ""
                 }`}
                 onClick={() => handleTabClick(item.id)}
               >

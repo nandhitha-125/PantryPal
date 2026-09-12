@@ -541,7 +541,109 @@
   line-height: 1.5;
 }
 
-/* ================= 6. Responsive Breakpoints ================= */
+/* ================= 6. Status States (Loading, Error, Alert) ================= */
+.shopping-status-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  border-radius: 16px;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.shopping-loading-box {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #059669;
+}
+
+.shopping-error-box {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shopping-loading-box {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #34d399;
+  }
+
+  .shopping-error-box {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+  }
+}
+
+.shopping-action-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shopping-action-error {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+  }
+}
+
+.shopping-action-error button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.35rem;
+  line-height: 1;
+}
+
+.status-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.retry-btn {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #059669;
+}
+
+/* ================= 7. Responsive Breakpoints ================= */
 @media (max-width: 640px) {
   .shopping-container {
     padding: 1.25rem 1rem 2rem;

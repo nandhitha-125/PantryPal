@@ -1,91 +1,195 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./ShoppingList.css";
 
-const INITIAL_SHOPPING_ITEMS = [
-  { id: "item-1", name: "Extra Virgin Olive Oil", quantity: "1 bottle", completed: false },
-  { id: "item-2", name: "Organic Eggs", quantity: "1 dozen", completed: false },
-  { id: "item-3", name: "Sourdough Bread", quantity: "1 loaf", completed: true },
-  { id: "item-4", name: "Fresh Spinach", quantity: "200g", completed: false },
-];
-
-let itemCounter = 100;
-function createShoppingItem(name, quantity = "") {
-  itemCounter += 1;
-  return {
-    id: `item-${Date.now()}-${itemCounter}`,
-    name,
-    quantity,
-    completed: false,
-  };
-}
-
 export default function ShoppingList({ onTabChange }) {
-  // Shopping items stored in React state with localStorage persistence
-  const [items, setItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem("pantrypal_shopping_list");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch {
-      // fallback to initial items on error
-    }
-    return INITIAL_SHOPPING_ITEMS;
-  });
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   const [nameInput, setNameInput] = useState("");
   const [qtyInput, setQtyInput] = useState("");
 
-  // Keep localStorage synchronized whenever items state changes
+  // Fetch shopping items from MongoDB on mount
   useEffect(() => {
-    try {
-      localStorage.setItem("pantrypal_shopping_list", JSON.stringify(items));
-    } catch {
-      // ignore storage errors
-    }
-  }, [items]);
+    let isMounted = true;
+    const controller = new AbortController();
+
+    fetch("http://localhost:5000/api/shopping", { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status} (${res.statusText})`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (isMounted) {
+          setItems(Array.isArray(data) ? data : []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted && err.name !== "AbortError") {
+          setError(err.message || "Failed to load shopping list.");
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    fetch("http://localhost:5000/api/shopping")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status} (${res.statusText})`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setItems(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load shopping list.");
+        setLoading(false);
+      });
+  }, []);
 
   // Derived metrics
   const totalItems = items.length;
   const remainingCount = items.filter((item) => !item.completed).length;
   const completedCount = totalItems - remainingCount;
 
-  // Add a new shopping item
-  const handleAddItem = (e) => {
+  // Add a new shopping item to MongoDB
+  const handleAddItem = async (e) => {
     if (e) e.preventDefault();
     const trimmedName = nameInput.trim();
     if (!trimmedName) return;
 
-    setItems((prev) => [createShoppingItem(trimmedName, qtyInput.trim()), ...prev]);
-    setNameInput("");
-    setQtyInput("");
+    setActionError(null);
+    const payload = { name: trimmedName, completed: false };
+    const parsedQty = Number(qtyInput.trim());
+    if (qtyInput.trim() !== "" && !isNaN(parsedQty)) {
+      payload.quantity = parsedQty;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/shopping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to add item to shopping list.");
+      }
+
+      const savedItem = await response.json();
+      setItems((prev) => [savedItem, ...prev]);
+      setNameInput("");
+      setQtyInput("");
+    } catch (err) {
+      setActionError(err.message || "Failed to add item. Please try again.");
+    }
   };
 
-  // Toggle item checkbox (checked/unchecked)
-  const handleToggleItem = (id) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
+  // Toggle item completed status via PUT
+  const handleToggleItem = async (id, currentCompleted) => {
+    setActionError(null);
+    try {
+      const response = await fetch(`http://localhost:5000/api/shopping/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !currentCompleted }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to update item.");
+      }
+
+      const updatedItem = await response.json();
+      setItems((prev) =>
+        prev.map((item) => (item._id === id ? updatedItem : item))
+      );
+    } catch (err) {
+      setActionError(err.message || "Failed to update item status.");
+    }
   };
 
-  // Delete an individual item
-  const handleDeleteItem = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  // Delete an individual item via DELETE
+  const handleDeleteItem = async (id) => {
+    setActionError(null);
+    try {
+      const response = await fetch(`http://localhost:5000/api/shopping/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to delete item.");
+      }
+
+      setItems((prev) => prev.filter((item) => item._id !== id));
+    } catch (err) {
+      setActionError(err.message || "Failed to delete item.");
+    }
   };
 
-  // Clear all completed items
-  const handleClearCompleted = () => {
-    setItems((prev) => prev.filter((item) => !item.completed));
+  // Clear all completed items via existing DELETE API
+  const handleClearCompleted = async () => {
+    setActionError(null);
+    const completedItems = items.filter((item) => item.completed);
+    if (completedItems.length === 0) return;
+
+    try {
+      const deletePromises = completedItems.map(async (item) => {
+        const res = await fetch(`http://localhost:5000/api/shopping/${item._id}`, {
+          method: "DELETE",
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to delete completed item: ${item.name}`);
+        }
+      });
+
+      await Promise.all(deletePromises);
+      setItems((prev) => prev.filter((item) => !item.completed));
+    } catch (err) {
+      setActionError(err.message || "Failed to clear completed items.");
+      handleRetry();
+    }
   };
 
   // Quick-add sample item via data attribute
-  const handleQuickAddClick = (e) => {
+  const handleQuickAddClick = async (e) => {
     const staple = e.currentTarget.dataset.staple;
     if (!staple) return;
-    setItems((prev) => [createShoppingItem(staple), ...prev]);
+
+    setActionError(null);
+    try {
+      const response = await fetch("http://localhost:5000/api/shopping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: staple, completed: false }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to add staple.");
+      }
+
+      const savedItem = await response.json();
+      setItems((prev) => [savedItem, ...prev]);
+    } catch (err) {
+      setActionError(err.message || "Failed to add staple item.");
+    }
   };
 
   return (
@@ -126,6 +230,20 @@ export default function ShoppingList({ onTabChange }) {
         </p>
       </section>
 
+      {/* Action Error Alert */}
+      {actionError && (
+        <div className="shopping-action-error" role="alert">
+          <span>{actionError}</span>
+          <button
+            type="button"
+            onClick={() => setActionError(null)}
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* 2. Add Item Card */}
       <section className="shopping-add-card" aria-label="Add shopping item">
         <form onSubmit={handleAddItem} className="shopping-form">
@@ -146,7 +264,7 @@ export default function ShoppingList({ onTabChange }) {
               id="shopping-item-qty"
               type="text"
               className="item-qty-input"
-              placeholder="Qty (optional, e.g. 500g, 2 packs)"
+              placeholder="Qty (optional, e.g. 2, 5)"
               value={qtyInput}
               onChange={(e) => setQtyInput(e.target.value)}
               aria-label="Item quantity"
@@ -221,8 +339,30 @@ export default function ShoppingList({ onTabChange }) {
           </button>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="shopping-status-box shopping-loading-box">
+            <div className="status-spinner" aria-hidden="true"></div>
+            <p>Loading your shopping list...</p>
+          </div>
+        )}
+
+        {/* Fetch Error State */}
+        {!loading && error && (
+          <div className="shopping-status-box shopping-error-box" role="alert">
+            <span style={{ fontSize: "1.5rem" }} aria-hidden="true">
+              ⚠️
+            </span>
+            <p style={{ fontWeight: 600, margin: 0 }}>Could not load shopping list</p>
+            <p style={{ margin: 0, fontSize: "0.9rem" }}>{error}</p>
+            <button type="button" className="retry-btn" onClick={handleRetry}>
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Empty State */}
-        {totalItems === 0 && (
+        {!loading && !error && totalItems === 0 && (
           <div className="shopping-empty-box" role="status">
             <div className="empty-icon" aria-hidden="true">
               🛒
@@ -231,24 +371,15 @@ export default function ShoppingList({ onTabChange }) {
             <p className="empty-desc">
               All caught up! Add ingredients or essentials you need to buy on your next grocery run.
             </p>
-            <button
-              type="button"
-              className="add-btn"
-              onClick={() => {
-                setItems(INITIAL_SHOPPING_ITEMS);
-              }}
-            >
-              Load Sample List
-            </button>
           </div>
         )}
 
         {/* List of Items */}
-        {totalItems > 0 && (
+        {!loading && !error && totalItems > 0 && (
           <ul className="shopping-items-list" aria-label="Shopping items">
             {items.map((item) => (
               <li
-                key={item.id}
+                key={item._id}
                 className={`shopping-item-row ${item.completed ? "completed" : ""}`}
               >
                 <div className="item-left">
@@ -257,23 +388,25 @@ export default function ShoppingList({ onTabChange }) {
                       type="checkbox"
                       className="item-checkbox"
                       checked={item.completed}
-                      onChange={() => handleToggleItem(item.id)}
+                      onChange={() => handleToggleItem(item._id, item.completed)}
                       aria-label={`Mark ${item.name} as ${item.completed ? "incomplete" : "complete"}`}
                     />
                   </label>
 
                   <div className="item-details">
                     <span className="item-name">{item.name}</span>
-                    {item.quantity && (
-                      <span className="item-quantity-pill">{item.quantity}</span>
-                    )}
+                    {item.quantity !== null &&
+                      item.quantity !== undefined &&
+                      item.quantity !== "" && (
+                        <span className="item-quantity-pill">{item.quantity}</span>
+                      )}
                   </div>
                 </div>
 
                 <button
                   type="button"
                   className="item-delete-btn"
-                  onClick={() => handleDeleteItem(item.id)}
+                  onClick={() => handleDeleteItem(item._id)}
                   aria-label={`Delete ${item.name} from list`}
                   title={`Delete ${item.name}`}
                 >

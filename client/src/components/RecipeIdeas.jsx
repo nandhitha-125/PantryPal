@@ -1,19 +1,54 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import "./RecipeIdeas.css";
 
-export default function RecipeIdeas({ onTabChange }) {
+export default function RecipeIdeas({
+  onTabChange,
+  onAddItem,
+  groceries = [],
+  loadingGroceries = false,
+  groceriesError = null,
+  onRetryPantry,
+}) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [ingredientsInput, setIngredientsInput] = useState("milk, egg, bread");
-  const [pantryItems, setPantryItems] = useState([]);
-  const [loadingPantry, setLoadingPantry] = useState(true);
+  const [customInput, setCustomInput] = useState(null);
 
-  // Fetch recipe ideas from Spoonacular backend endpoint
+  // Safe memoized groceries array
+  const safeGroceries = useMemo(() => {
+    return Array.isArray(groceries) ? groceries : [];
+  }, [groceries]);
+
+  // Extract unique grocery names from the actual inventory
+  const uniquePantryIngredients = useMemo(() => {
+    const seen = new Set();
+    const list = [];
+    for (const item of safeGroceries) {
+      const name = item?.name?.trim();
+      if (name && !seen.has(name.toLowerCase())) {
+        seen.add(name.toLowerCase());
+        list.push(name);
+      }
+    }
+    return list;
+  }, [safeGroceries]);
+
+  // Build the comma-separated ingredient string from the actual inventory
+  const pantryIngredientsString = useMemo(() => {
+    return uniquePantryIngredients.join(", ");
+  }, [uniquePantryIngredients]);
+
+  // If user hasn't typed a custom query, use the live pantry ingredients string
+  const ingredientsInput = customInput !== null ? customInput : pantryIngredientsString;
+
+  const lastPantryQueryRef = useRef(null);
+
+  // Fetch recipe ideas for user interactions (submit, chips, retry)
   const fetchRecipes = useCallback(async (ingredientsString) => {
     const query = ingredientsString.trim();
     if (!query) {
       setError("Please enter at least one ingredient to search for recipes.");
+      setRecipes([]);
       return;
     }
 
@@ -41,40 +76,50 @@ export default function RecipeIdeas({ onTabChange }) {
     }
   }, []);
 
-  // Fetch pantry groceries on mount to provide quick ingredient chips
+  // Automatically fetch recipes for live pantry inventory on initial load or when pantry updates
   useEffect(() => {
-    let isMounted = true;
+    if (loadingGroceries || !pantryIngredientsString) {
+      return;
+    }
 
-    fetch("http://localhost:5000/api/groceries")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
-        if (!isMounted) return;
-        setLoadingPantry(false);
-        if (Array.isArray(data) && data.length > 0) {
-          const names = data.map((item) => item.name.trim()).filter(Boolean);
-          setPantryItems(names);
+    // Only auto-fetch when pantry ingredients string is newly available or has changed
+    if (lastPantryQueryRef.current !== pantryIngredientsString) {
+      lastPantryQueryRef.current = pantryIngredientsString;
 
-          // If ingredientsInput has default, use up to 4 pantry items
-          const topIngredients = names.slice(0, 4).join(", ");
-          if (topIngredients) {
-            setIngredientsInput(topIngredients);
-            fetchRecipes(topIngredients);
-            return;
+      let isMounted = true;
+      const controller = new AbortController();
+
+      fetch(
+        `http://localhost:5000/api/recipes?ingredients=${encodeURIComponent(pantryIngredientsString)}`,
+        { signal: controller.signal }
+      )
+        .then((res) => {
+          if (!res.ok) {
+            return res.json().catch(() => ({})).then((data) => {
+              throw new Error(data.message || `Failed to fetch recipes (${res.status})`);
+            });
           }
-        }
-        // Fallback default
-        fetchRecipes("milk, egg, bread");
-      })
-      .catch(() => {
-        if (!isMounted) return;
-        setLoadingPantry(false);
-        fetchRecipes("milk, egg, bread");
-      });
+          return res.json();
+        })
+        .then((data) => {
+          if (isMounted) {
+            setRecipes(Array.isArray(data) ? data : []);
+            setLoading(false);
+          }
+        })
+        .catch((err) => {
+          if (isMounted && err.name !== "AbortError") {
+            setError(err.message || "Failed to load recipe suggestions.");
+            setLoading(false);
+          }
+        });
 
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchRecipes]);
+      return () => {
+        isMounted = false;
+        controller.abort();
+      };
+    }
+  }, [loadingGroceries, pantryIngredientsString]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -95,9 +140,20 @@ export default function RecipeIdeas({ onTabChange }) {
     }
 
     const newQuery = updated.join(", ");
-    setIngredientsInput(newQuery);
+    setCustomInput(newQuery);
     if (newQuery) {
       fetchRecipes(newQuery);
+    } else {
+      setRecipes([]);
+    }
+  };
+
+  const handleResetToPantry = () => {
+    setCustomInput(null);
+    if (pantryIngredientsString) {
+      fetchRecipes(pantryIngredientsString);
+    } else {
+      setRecipes([]);
     }
   };
 
@@ -150,8 +206,8 @@ export default function RecipeIdeas({ onTabChange }) {
               type="text"
               className="ingredients-input"
               value={ingredientsInput}
-              onChange={(e) => setIngredientsInput(e.target.value)}
-              placeholder="e.g. milk, eggs, bread, cheese..."
+              onChange={(e) => setCustomInput(e.target.value)}
+              placeholder="e.g. Chicken, Rice, Tomatoes..."
             />
             <button
               type="submit"
@@ -177,14 +233,15 @@ export default function RecipeIdeas({ onTabChange }) {
           </div>
 
           {/* Quick Pantry Ingredients Tags */}
-          {!loadingPantry && pantryItems.length > 0 && (
+          {!loadingGroceries && uniquePantryIngredients.length > 0 && (
             <div className="pantry-tags-wrapper">
               <span className="pantry-tags-label">From your pantry:</span>
               <div className="pantry-chips-list">
-                {pantryItems.slice(0, 8).map((item, idx) => {
-                  const isSelected = ingredientsInput
-                    .toLowerCase()
-                    .includes(item.toLowerCase());
+                {uniquePantryIngredients.slice(0, 12).map((item, idx) => {
+                  const currentList = ingredientsInput
+                    .split(",")
+                    .map((s) => s.trim().toLowerCase());
+                  const isSelected = currentList.includes(item.toLowerCase());
                   return (
                     <button
                       key={`${item}-${idx}`}
@@ -204,7 +261,66 @@ export default function RecipeIdeas({ onTabChange }) {
         </form>
       </section>
 
-      {/* Loading State */}
+      {/* Pantry Inventory Loading State */}
+      {loadingGroceries && (
+        <div className="recipes-status-box recipes-loading-box">
+          <div className="status-spinner" aria-hidden="true"></div>
+          <p>Loading your pantry ingredients...</p>
+        </div>
+      )}
+
+      {/* Pantry Inventory Error State */}
+      {!loadingGroceries && groceriesError && (
+        <div className="recipes-status-box recipes-error-box" role="alert">
+          <span className="error-icon" aria-hidden="true">
+            ⚠️
+          </span>
+          <div className="error-content">
+            <p className="error-title">Could not load pantry inventory</p>
+            <p className="error-desc">{groceriesError}</p>
+          </div>
+          {onRetryPantry && (
+            <button type="button" className="retry-btn" onClick={onRetryPantry}>
+              Retry
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Empty Pantry State - Shown when pantry has no items */}
+      {!loadingGroceries && !groceriesError && safeGroceries.length === 0 && (
+        <div className="recipes-status-box recipes-empty-box" role="status">
+          <div className="recipes-empty-icon" aria-hidden="true">
+            🧺
+          </div>
+          <p className="recipes-empty-title">Your Pantry is Empty</p>
+          <p className="recipes-empty-desc">
+            Add ingredients to your pantry inventory first! PantryPal will automatically find delicious recipes you can cook with them.
+          </p>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center", marginTop: "0.5rem" }}>
+            {onAddItem && (
+              <button
+                type="button"
+                className="find-recipes-btn"
+                onClick={onAddItem}
+              >
+                <span>+ Add Item to Pantry</span>
+              </button>
+            )}
+            {onTabChange && (
+              <button
+                type="button"
+                className="back-to-inventory-btn"
+                onClick={() => onTabChange("inventory")}
+              >
+                <span>Go to Inventory</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Recipe Searching Loading State */}
       {loading && (
         <div className="recipes-status-box recipes-loading-box">
           <div className="status-spinner" aria-hidden="true"></div>
@@ -212,7 +328,7 @@ export default function RecipeIdeas({ onTabChange }) {
         </div>
       )}
 
-      {/* Error State */}
+      {/* Recipe Fetch Error State */}
       {!loading && error && (
         <div className="recipes-status-box recipes-error-box" role="alert">
           <span className="error-icon" aria-hidden="true">
@@ -232,29 +348,32 @@ export default function RecipeIdeas({ onTabChange }) {
         </div>
       )}
 
-      {/* Empty State */}
-      {!loading && !error && recipes.length === 0 && (
-        <div className="recipes-status-box recipes-empty-box" role="status">
-          <div className="recipes-empty-icon" aria-hidden="true">
-            🍽️
+      {/* Empty Recipe Search Results */}
+      {!loadingGroceries &&
+        !loading &&
+        !error &&
+        safeGroceries.length > 0 &&
+        recipes.length === 0 &&
+        ingredientsInput.trim() !== "" && (
+          <div className="recipes-status-box recipes-empty-box" role="status">
+            <div className="recipes-empty-icon" aria-hidden="true">
+              🍽️
+            </div>
+            <p className="recipes-empty-title">No matching recipes found</p>
+            <p className="recipes-empty-desc">
+              We couldn&apos;t find any recipes for &ldquo;{ingredientsInput}&rdquo;. Try adjusting your ingredients or adding common staples like olive oil, garlic, or pasta.
+            </p>
+            {pantryIngredientsString && (
+              <button
+                type="button"
+                className="find-recipes-btn"
+                onClick={handleResetToPantry}
+              >
+                Reset to All Pantry Ingredients
+              </button>
+            )}
           </div>
-          <p className="recipes-empty-title">No matching recipes found</p>
-          <p className="recipes-empty-desc">
-            We couldn&apos;t find any recipes for &ldquo;{ingredientsInput}&rdquo;. Try adding common
-            staples like chicken, milk, eggs, pasta, or flour.
-          </p>
-          <button
-            type="button"
-            className="find-recipes-btn"
-            onClick={() => {
-              setIngredientsInput("milk, egg, bread");
-              fetchRecipes("milk, egg, bread");
-            }}
-          >
-            Reset to Sample Ingredients
-          </button>
-        </div>
-      )}
+        )}
 
       {/* Recipe Cards Grid */}
       {!loading && !error && recipes.length > 0 && (

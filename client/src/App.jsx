@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
 import RecipeIdeas from "./components/RecipeIdeas";
 import ShoppingList from "./components/ShoppingList";
 import AddGroceryForm from "./components/AddGroceryForm";
+import { isExpiringSoon } from "./utils/expiryUtils";
 import "./App.css";
 
 function App() {
@@ -12,7 +13,55 @@ function App() {
   const [editingItem, setEditingItem] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expiringCount, setExpiringCount] = useState(0);
+  const [groceries, setGroceries] = useState([]);
+  const [loadingGroceries, setLoadingGroceries] = useState(true);
+  const [groceriesError, setGroceriesError] = useState(null);
+
+  // Fetch actual grocery inventory once at application root level
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    fetch("http://localhost:5000/api/groceries", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status} (${response.statusText})`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (isMounted) {
+          setGroceries(Array.isArray(data) ? data : []);
+          setLoadingGroceries(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted && err.name !== "AbortError") {
+          setGroceriesError(
+            err.message || "Failed to connect to the server. Please ensure the backend is running."
+          );
+          setLoadingGroceries(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [refreshKey]);
+
+  // Handler for retry button
+  const handleRetryGroceries = useCallback(() => {
+    setLoadingGroceries(true);
+    setGroceriesError(null);
+    setRefreshKey((prev) => prev + 1);
+  }, []);
+
+  // Compute live expiring count directly from real inventory
+  const expiringCount = useMemo(() => {
+    if (!Array.isArray(groceries)) return 0;
+    return groceries.filter((item) => isExpiringSoon(item.expiryDate)).length;
+  }, [groceries]);
 
   const handleAddItem = () => {
     setEditingItem(null);
@@ -37,10 +86,6 @@ function App() {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleExpiringCountChange = useCallback((count) => {
-    setExpiringCount(count);
-  }, []);
-
   return (
     <div className="app-container">
       <Navbar
@@ -54,7 +99,14 @@ function App() {
 
       <main className="main-content">
         {activeTab === "recipes" ? (
-          <RecipeIdeas onTabChange={setActiveTab} />
+          <RecipeIdeas
+            onTabChange={setActiveTab}
+            onAddItem={handleAddItem}
+            groceries={groceries}
+            loadingGroceries={loadingGroceries}
+            groceriesError={groceriesError}
+            onRetryPantry={handleRetryGroceries}
+          />
         ) : activeTab === "shopping" ? (
           <ShoppingList onTabChange={setActiveTab} />
         ) : (
@@ -64,9 +116,12 @@ function App() {
             onSearchChange={setSearchQuery}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            onExpiringCountChange={handleExpiringCountChange}
             onEdit={handleEditItem}
             onDeleteSuccess={handleGroceryDeleted}
+            groceries={groceries}
+            loading={loadingGroceries}
+            error={groceriesError}
+            onRetry={handleRetryGroceries}
           />
         )}
       </main>

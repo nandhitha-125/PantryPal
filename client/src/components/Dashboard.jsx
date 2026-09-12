@@ -1,40 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { getExpiryStatus, isExpiringSoon } from "../utils/expiryUtils";
 import "./Dashboard.css";
-
-// Helper to determine expiry badge status and label
-const getExpiryStatus = (expiryDateString) => {
-  if (!expiryDateString) {
-    return { status: "fresh", label: "Fresh" };
-  }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const expiry = new Date(expiryDateString);
-  if (isNaN(expiry.getTime())) {
-    return { status: "fresh", label: "Fresh" };
-  }
-  expiry.setHours(0, 0, 0, 0);
-
-  const diffTime = expiry.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) {
-    return { status: "urgent", label: "Expired" };
-  } else if (diffDays === 0) {
-    return { status: "urgent", label: "Expires Today" };
-  } else if (diffDays <= 3) {
-    return { status: "expiring", label: `${diffDays}d left` };
-  } else {
-    return { status: "fresh", label: "Fresh" };
-  }
-};
-
-// Check if a grocery item is expired or expiring within the next 3 days
-const isExpiringSoon = (expiryDateString) => {
-  const { status } = getExpiryStatus(expiryDateString);
-  return status === "urgent" || status === "expiring";
-};
 
 export default function Dashboard({
   refreshKey = 0,
@@ -45,11 +11,21 @@ export default function Dashboard({
   onExpiringCountChange,
   onEdit,
   onDeleteSuccess,
+  groceries: propGroceries,
+  loading: propLoading,
+  error: propError,
+  onRetry: propRetry,
 }) {
   // 1. State for groceries, loading status, and error messages
-  const [groceries, setGroceries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const isControlled = propGroceries !== undefined;
+  const [internalGroceries, setInternalGroceries] = useState([]);
+  const [internalLoading, setInternalLoading] = useState(true);
+  const [internalError, setInternalError] = useState(null);
+
+  const groceries = isControlled ? propGroceries : internalGroceries;
+  const loading = propLoading !== undefined ? propLoading : internalLoading;
+  const error = propError !== undefined ? propError : internalError;
+
   const [deletingId, setDeletingId] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -59,7 +35,7 @@ export default function Dashboard({
   // Notify parent component (Navbar) of the real expiring count using actual grocery data
   const updateExpiringCount = useCallback(
     (items) => {
-      if (onExpiringCountChange) {
+      if (onExpiringCountChange && Array.isArray(items)) {
         const count = items.filter((item) => isExpiringSoon(item.expiryDate)).length;
         onExpiringCountChange(count);
       }
@@ -69,8 +45,13 @@ export default function Dashboard({
 
   // 2. Fetch groceries from Express API
   const fetchGroceries = () => {
-    setLoading(true);
-    setError(null);
+    if (propRetry) {
+      propRetry();
+      return;
+    }
+
+    setInternalLoading(true);
+    setInternalError(null);
 
     fetch("http://localhost:5000/api/groceries")
       .then((response) => {
@@ -80,20 +61,25 @@ export default function Dashboard({
         return response.json();
       })
       .then((data) => {
-        setGroceries(data);
-        setLoading(false);
+        setInternalGroceries(data);
+        setInternalLoading(false);
         updateExpiringCount(data);
       })
       .catch((err) => {
-        setError(
+        setInternalError(
           err.message || "Failed to connect to the server. Please ensure the backend is running."
         );
-        setLoading(false);
+        setInternalLoading(false);
       });
   };
 
   // 3. useEffect to fetch on initial component mount and when refreshKey updates
   useEffect(() => {
+    if (isControlled) {
+      updateExpiringCount(groceries);
+      return;
+    }
+
     let isMounted = true;
 
     fetch("http://localhost:5000/api/groceries")
@@ -105,24 +91,24 @@ export default function Dashboard({
       })
       .then((data) => {
         if (isMounted) {
-          setGroceries(data);
-          setLoading(false);
+          setInternalGroceries(data);
+          setInternalLoading(false);
           updateExpiringCount(data);
         }
       })
       .catch((err) => {
         if (isMounted) {
-          setError(
+          setInternalError(
             err.message || "Failed to connect to the server. Please ensure the backend is running."
           );
-          setLoading(false);
+          setInternalLoading(false);
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [refreshKey, updateExpiringCount]);
+  }, [refreshKey, updateExpiringCount, isControlled, groceries]);
 
   // 4. Extract unique categories present in the grocery data
   const availableCategories = useMemo(() => {

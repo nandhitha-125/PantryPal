@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./Dashboard.css";
 
-export default function Dashboard() {
+export default function Dashboard({ refreshKey = 0 }) {
   // 1. State for groceries, loading status, and error messages
   const [groceries, setGroceries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ export default function Dashboard() {
       });
   };
 
-  // 3. useEffect to fetch on initial component mount
+  // 3. useEffect to fetch on initial component mount and when refreshKey updates
   useEffect(() => {
     let isMounted = true;
 
@@ -60,7 +60,7 @@ export default function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   // 4. Calculate Summary Metrics from the live groceries array
   const totalItems = groceries.length;

@@ -1,0 +1,453 @@
+/* PantryPal Add Grocery Modal Styles */
+
+/* ================= 1. Modal Overlay & Backdrop ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1.25rem;
+  box-sizing: border-box;
+  animation: overlayFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ================= 2. Modal Card ================= */
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1);
+  padding: 1.75rem 2rem;
+  box-sizing: border-box;
+  text-align: left;
+  animation: cardSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-card {
+    background: #1a1c24;
+    border-color: #2e313d;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ================= 3. Header ================= */
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border, #f1f5f9);
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-header {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.modal-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  width: fit-content;
+  margin-bottom: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-badge {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.15);
+  }
+}
+
+.badge-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-h, #0f172a);
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.modal-subtitle {
+  font-size: 0.88rem;
+  color: var(--text, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text, #64748b);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-close-btn {
+    border-color: #2e313d;
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.modal-close-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-h, #0f172a);
+  transform: scale(1.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-close-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.modal-close-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ================= 4. Error Alert Banner ================= */
+.form-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(239, 68, 68, 0.09);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  animation: shake 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .form-error-banner {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+  }
+}
+
+.error-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* ================= 5. Form Elements ================= */
+.add-grocery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-h, #1e293b);
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.required-star {
+  color: #ef4444;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: var(--text-h, #0f172a);
+  background: var(--bg, #ffffff);
+  border: 1.5px solid var(--border, #cbd5e1);
+  border-radius: 10px;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .form-input,
+  .form-select {
+    background: #14151b;
+    border-color: #2e313d;
+    color: var(--text-h, #f3f4f6);
+  }
+}
+
+.form-input::placeholder {
+  color: var(--text, #94a3b8);
+  opacity: 0.8;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+  background: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .form-input:focus,
+  .form-select:focus {
+    background: #16171e;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+}
+
+.form-input:disabled,
+.form-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Custom Select Dropdown Styling */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.2rem;
+  cursor: pointer;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text, #64748b);
+  font-size: 0.85rem;
+}
+
+/* Date input styling */
+.date-input {
+  cursor: pointer;
+}
+
+/* Row with multiple columns */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* ================= 6. Action Buttons ================= */
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, #f1f5f9);
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-actions {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1.5px solid var(--border, #cbd5e1);
+  color: var(--text, #64748b);
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-cancel {
+    border-color: #2e313d;
+    color: var(--text, #9ca3af);
+  }
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-h, #0f172a);
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-cancel:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+  }
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #ffffff;
+  padding: 0.65rem 1.4rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 140px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+  filter: brightness(1.04);
+}
+
+.btn-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-submit:disabled,
+.btn-cancel:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================= 7. Responsive Breakpoints ================= */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    padding: 1.35rem 1.25rem;
+    border-radius: 18px 18px 0 0;
+    max-height: 92vh;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 0.6rem;
+  }
+
+  .btn-submit,
+  .btn-cancel {
+    width: 100%;
+    padding: 0.75rem;
+  }
+}

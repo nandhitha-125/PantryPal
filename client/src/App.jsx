@@ -1,13 +1,24 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
+import AddGroceryForm from "./components/AddGroceryForm";
 import "./App.css";
 
 function App() {
   const [activeTab, setActiveTab] = useState("inventory");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleAddItem = () => {
-    alert("Add Item modal or form triggered!");
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleGroceryAdded = () => {
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (
@@ -20,8 +31,14 @@ function App() {
       />
 
       <main className="main-content">
-        <Dashboard />
+        <Dashboard refreshKey={refreshKey} />
       </main>
+
+      <AddGroceryForm
+        isOpen={isAddModalOpen}
+        onClose={handleCloseModal}
+        onSuccess={handleGroceryAdded}
+      />
     </div>
   );
 }

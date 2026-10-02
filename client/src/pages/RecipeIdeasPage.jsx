@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { usePantry } from "../context/usePantry";
 import { useAuth } from "../context/useAuth";
 import { getExpiryStatus } from "../utils/expiryUtils";
+import { API } from "../utils/api";
 import "./RecipeIdeasPage.css";
 
 export default function RecipeIdeasPage() {
@@ -68,7 +69,7 @@ export default function RecipeIdeasPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/recipes?ingredients=${encodeURIComponent(query)}`,
+        `${API.RECIPES}?ingredients=${encodeURIComponent(query)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -102,7 +103,7 @@ export default function RecipeIdeasPage() {
     initialLoadDone.current = true;
     let isMounted = true;
 
-    fetch(`http://localhost:5000/api/recipes?ingredients=${encodeURIComponent(initialQuery)}`, {
+    fetch(`${API.RECIPES}?ingredients=${encodeURIComponent(initialQuery)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -160,7 +161,7 @@ export default function RecipeIdeasPage() {
 
     try {
       for (const ing of recipe.missedIngredients) {
-        await fetch("http://localhost:5000/api/shopping", {
+        await fetch(API.SHOPPING, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

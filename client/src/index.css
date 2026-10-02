@@ -127,6 +127,50 @@ body {
   background-attachment: fixed;
   color: var(--color-text-main);
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Translucent Leafy Background Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.28;
+  background-image:
+    /* Leaf 1: Top Left Monstera Leaf */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none'%3E%3Cpath d='M20 180 Q60 20 180 30 Q140 140 20 180 Z' fill='%23A3E635' fill-opacity='0.5'/%3E%3Cpath d='M20 180 Q100 105 180 30' stroke='%23FFFFFF' stroke-opacity='0.4' stroke-width='2.5'/%3E%3Cpath d='M60 140 Q90 120 110 130' stroke='%23FFFFFF' stroke-opacity='0.3' stroke-width='1.5'/%3E%3Cpath d='M90 100 Q120 80 140 90' stroke='%23FFFFFF' stroke-opacity='0.3' stroke-width='1.5'/%3E%3C/svg%3E"),
+    /* Leaf 2: Top Right Palm Blade */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 220' fill='none'%3E%3Cpath d='M80 10 C30 70 10 150 40 210 C90 180 120 130 80 10 Z' fill='%237ED957' fill-opacity='0.45'/%3E%3Cpath d='M80 10 Q80 110 40 210' stroke='%23FFFFFF' stroke-opacity='0.35' stroke-width='2'/%3E%3C/svg%3E"),
+    /* Leaf 3: Bottom Left Branch with Leaves */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240' fill='none'%3E%3Cpath d='M20 220 Q120 120 220 20' stroke='%23A3E635' stroke-opacity='0.35' stroke-width='3'/%3E%3Cpath d='M70 170 Q40 130 90 130 Q110 160 70 170 Z' fill='%23A3E635' fill-opacity='0.4'/%3E%3Cpath d='M130 110 Q100 70 150 70 Q170 100 130 110 Z' fill='%237ED957' fill-opacity='0.4'/%3E%3Cpath d='M180 60 Q150 20 200 20 Q220 50 180 60 Z' fill='%23A3E635' fill-opacity='0.45'/%3E%3C/svg%3E"),
+    /* Leaf 4: Bottom Right Translucent Botanical Leaf */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180' fill='none'%3E%3Cpath d='M10 90 Q90 10 170 90 Q90 170 10 90 Z' fill='%237ED957' fill-opacity='0.4'/%3E%3Cpath d='M10 90 L170 90' stroke='%23FFFFFF' stroke-opacity='0.3' stroke-width='2'/%3E%3C/svg%3E");
+  background-position:
+    -40px -40px,
+    calc(100% + 30px) -30px,
+    -50px calc(100% + 40px),
+    calc(100% + 40px) calc(100% + 40px);
+  background-repeat: no-repeat;
+  background-size: 320px 320px, 280px 360px, 340px 340px, 300px 300px;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.15));
+  animation: floatLeaves 16s ease-in-out infinite alternate;
+}
+
+@keyframes floatLeaves {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1.5deg);
+  }
+  100% {
+    transform: translateY(8px) rotate(-1.5deg);
+  }
 }
 
 #root {
@@ -134,6 +178,8 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* Headings */

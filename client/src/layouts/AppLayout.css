@@ -570,6 +570,33 @@
   margin: 0 auto;
 }
 
+/* Sidebar Close Button for Mobile Drawer */
+.sidebar-close-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Mobile Bottom Navigation Bar (Hidden on Desktop) */
+.mobile-bottom-nav {
+  display: none;
+}
+
 /* --------------------------------------------------------------------------
    4. Mobile Responsive Navigation
    -------------------------------------------------------------------------- */
@@ -583,25 +610,50 @@
     top: 0;
     left: 0;
     bottom: 0;
+    width: 280px;
     transform: translateX(-100%);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+    z-index: 300;
   }
 
   .app-sidebar.mobile-open {
     transform: translateX(0);
   }
 
+  .sidebar-close-btn {
+    display: flex;
+  }
+
   .mobile-backdrop {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(26, 46, 28, 0.4);
-    backdrop-filter: blur(12px);
-    z-index: 150;
+    background: rgba(10, 25, 12, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 250;
   }
 
   .mobile-toggle-btn {
     display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-main);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .mobile-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .mobile-toggle-label {
+    font-size: 12.5px;
+    font-weight: 600;
   }
 
   .topbar-center {
@@ -609,10 +661,106 @@
   }
 
   .app-topbar {
-    padding: 0 16px;
+    padding: 0 14px;
+  }
+
+  .notifications-menu {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: 380px;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   }
 
   .app-main-content {
-    padding: 16px;
+    padding: 16px 14px 84px 14px; /* Extra bottom padding for mobile nav bar */
+  }
+
+  /* Fixed Mobile Bottom Navigation Bar */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: linear-gradient(180deg, #1A3822 0%, #152A1C 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+    z-index: 200;
+    backdrop-filter: blur(16px);
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 4px;
+  }
+
+  .mobile-bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: color 150ms ease, transform 150ms ease;
+  }
+
+  .mobile-bottom-tab.active {
+    color: #4EA648;
+  }
+
+  .mobile-bottom-tab.active svg {
+    stroke: #4EA648;
+    filter: drop-shadow(0 0 6px rgba(78, 166, 72, 0.5));
+  }
+
+  .mobile-tab-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-tab-badge {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    background-color: var(--color-warning, #f59e0b);
+    color: #000;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 10px;
+    line-height: 1;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+  }
+
+  .mobile-tab-label {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-btn-text {
+    display: none;
+  }
+  
+  .add-grocery-top-btn {
+    padding: 8px 10px;
+  }
+
+  .crumb-root, .crumb-separator {
+    display: none;
   }
 }

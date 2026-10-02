@@ -33,6 +33,10 @@ app.use("/api/groceries", dbReady, groceryRoutes);
 app.use("/api/recipes", recipeRoutes); // recipes may use external API, not always DB
 app.use("/api/shopping", dbReady, shoppingRoutes);
 
+app.get("/", (req, res) => {
+  res.json({ message: "PantryPal API server is running!" });
+});
+
 app.get("/api/health", (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
   res.json({

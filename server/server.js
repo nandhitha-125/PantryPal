@@ -45,26 +45,28 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Connect to MongoDB
+// Connect to MongoDB with connection caching for serverless environments
+let isConnecting = null;
+
 async function connectDB() {
-  if (mongoose.connection.readyState >= 1) return;
+  if (mongoose.connection.readyState === 1) return;
 
   if (!process.env.MONGODB_URI) {
-    console.warn("MONGODB_URI not set in .env — running without database.");
+    console.warn("MONGODB_URI not set in environment — running without database.");
     return;
   }
 
-  // Disable buffering so operations fail fast instead of waiting 10s
-  mongoose.set("bufferCommands", false);
-
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
+  if (!isConnecting) {
+    mongoose.set("bufferCommands", false);
+    isConnecting = mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 8000,
+    }).catch((error) => {
+      isConnecting = null;
+      console.error("MongoDB connection failed:", error.message);
     });
-    console.log("MongoDB connected successfully!");
-  } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
   }
+
+  await isConnecting;
 }
 
 async function startServer() {

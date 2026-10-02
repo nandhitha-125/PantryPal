@@ -299,15 +299,14 @@ export default function AppLayout() {
               className="mobile-toggle-btn"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle Side Panel Navigation"
-              title="Open Side Panel Menu"
             >
               <svg
                 viewBox="0 0 24 24"
-                width="20"
-                height="20"
+                width="22"
+                height="22"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.2"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
@@ -315,13 +314,8 @@ export default function AppLayout() {
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
-              <span className="mobile-toggle-label">Side Panel</span>
+              <span className="mobile-toggle-label">Menu</span>
             </button>
-
-            {/* Mobile Brand Title (Shown on Phone View) */}
-            <div className="mobile-brand-title">
-              <span className="brand-title">Pantry<span className="brand-highlight">Pal</span></span>
-            </div>
 
             {/* Breadcrumb path */}
             <div className="topbar-breadcrumb">

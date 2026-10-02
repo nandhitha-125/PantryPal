@@ -636,45 +636,24 @@
   .mobile-toggle-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, rgba(78, 166, 72, 0.3) 0%, rgba(45, 117, 40, 0.45) 100%);
-    border: 1.5px solid rgba(78, 166, 72, 0.7);
-    color: #FFFFFF;
-    padding: 7px 14px;
-    border-radius: var(--radius-full);
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-main);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(78, 166, 72, 0.3);
-    transition: all var(--transition-fast);
+    font-size: 13px;
+    font-weight: 600;
   }
 
-  .mobile-toggle-btn:hover,
-  .mobile-toggle-btn:active {
-    background: linear-gradient(135deg, rgba(78, 166, 72, 0.45) 0%, rgba(45, 117, 40, 0.6) 100%);
-    box-shadow: 0 0 14px rgba(78, 166, 72, 0.5);
-    border-color: #4EA648;
-  }
-
-  .mobile-toggle-btn svg {
-    color: #4EA648;
-    filter: drop-shadow(0 0 4px rgba(78, 166, 72, 0.6));
+  .mobile-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   .mobile-toggle-label {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #FFFFFF;
-  }
-
-  .mobile-brand-title {
-    display: block;
-    margin-left: 4px;
-  }
-
-  .mobile-brand-title .brand-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #FFFFFF;
+    font-size: 12.5px;
+    font-weight: 600;
   }
 
   .topbar-center {

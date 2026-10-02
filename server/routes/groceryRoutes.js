@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const Grocery = require("../models/Grocery");
+const authenticate = require("../middleware/authenticate");
 
-// GET all groceries
+// All routes require authentication
+router.use(authenticate);
+
+// GET all groceries for the authenticated user
 router.get("/", async (req, res) => {
   try {
-    const groceries = await Grocery.find();
+    const groceries = await Grocery.find({ userId: req.userId });
     res.status(200).json(groceries);
   } catch (error) {
     res.status(500).json({
@@ -15,10 +19,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST a new grocery item
+// POST a new grocery item for the authenticated user
 router.post("/", async (req, res) => {
   try {
-    const newGrocery = new Grocery(req.body);
+    const newGrocery = new Grocery({ ...req.body, userId: req.userId });
     const savedGrocery = await newGrocery.save();
     res.status(201).json(savedGrocery);
   } catch (error) {
@@ -29,11 +33,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT (update) a grocery item by ID
+// PUT (update) a grocery item by ID — only if owned by the authenticated user
 router.put("/:id", async (req, res) => {
   try {
-    const grocery = await Grocery.findByIdAndUpdate(
-      req.params.id,
+    const grocery = await Grocery.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
       req.body,
       { new: true, runValidators: true }
     );
@@ -53,10 +57,13 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE a grocery item by ID
+// DELETE a grocery item by ID — only if owned by the authenticated user
 router.delete("/:id", async (req, res) => {
   try {
-    const grocery = await Grocery.findByIdAndDelete(req.params.id);
+    const grocery = await Grocery.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId
+    });
 
     if (!grocery) {
       return res.status(404).json({

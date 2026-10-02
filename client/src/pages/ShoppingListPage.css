@@ -1,0 +1,296 @@
+/* Shopping List Page Styles — Green Ombre Dark Theme */
+
+.shopping-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.shopping-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.shopping-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shopping-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.shopping-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+
+/* Progress Track */
+.progress-card {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-xs);
+  backdrop-filter: blur(16px);
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.progress-label {
+  color: var(--color-text-main);
+}
+
+.progress-pct {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3D8B37, var(--color-primary));
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(78, 166, 72, 0.3);
+}
+
+/* Add Item Form Bar */
+.add-item-bar {
+  display: flex;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  box-shadow: var(--shadow-xs);
+  backdrop-filter: blur(16px);
+}
+
+.input-item-name {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  font-size: 13.5px;
+  color: var(--color-text-main);
+  background: rgba(0, 0, 0, 0.18);
+  transition: all var(--transition-fast);
+}
+
+.input-item-name::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.input-item-name:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-primary);
+}
+
+.input-item-qty {
+  width: 100px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  font-size: 13.5px;
+  color: var(--color-text-main);
+  background: rgba(0, 0, 0, 0.18);
+  transition: all var(--transition-fast);
+}
+
+.input-item-qty::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.input-item-qty:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-primary);
+}
+
+.shopping-error-alert {
+  padding: 10px 14px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shopping-error-alert button {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Shopping List Card */
+.shopping-list-card {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+}
+
+.shopping-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.shopping-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-fast);
+}
+
+.shopping-row:last-child {
+  border-bottom: none;
+}
+
+.shopping-row:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.shopping-row.row-completed {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.item-checkbox {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-border-hover);
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: rgba(0, 0, 0, 0.18);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.item-checkbox:checked + .checkbox-custom {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.item-name-text {
+  font-size: 14px;
+  color: var(--color-text-main);
+  transition: all var(--transition-fast);
+}
+
+.row-completed .item-name-text {
+  text-decoration: line-through;
+  color: var(--color-text-subtle);
+}
+
+.row-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-qty-badge {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+}
+
+.btn-delete-item {
+  background: none;
+  border: none;
+  color: var(--color-text-subtle);
+  font-size: 13px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-delete-item:hover {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* Empty & Status Cards */
+.shopping-status-card {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(16px);
+}
+
+.empty-cart-icon {
+  font-size: 38px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 600px) {
+  .add-item-bar {
+    flex-direction: column;
+  }
+  .input-item-qty {
+    width: 100%;
+  }
+}

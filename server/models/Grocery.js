@@ -1,6 +1,13 @@
 const mongoose = require("mongoose");
 
 const grocerySchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true
+    },
+
     name: {
         type: String,
         required: true
@@ -29,4 +36,4 @@ const grocerySchema = new mongoose.Schema({
 
 const Grocery = mongoose.model("Grocery", grocerySchema);
 
-module.exports = Grocery;
+module.exports = Grocery;

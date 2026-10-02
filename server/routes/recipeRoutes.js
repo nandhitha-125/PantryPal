@@ -1,5 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const authenticate = require("../middleware/authenticate");
+
+// All recipe routes require authentication
+router.use(authenticate);
+
 router.get("/", async (req, res) => {
   try {
     const ingredients = req.query.ingredients;

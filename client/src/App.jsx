@@ -1,141 +1,85 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import Navbar from "./components/Navbar";
-import Dashboard from "./components/Dashboard";
-import RecipeIdeas from "./components/RecipeIdeas";
-import ShoppingList from "./components/ShoppingList";
-import AddGroceryForm from "./components/AddGroceryForm";
-import { isExpiringSoon } from "./utils/expiryUtils";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/useAuth";
+import { PantryProvider } from "./context/PantryContext";
+import AppLayout from "./layouts/AppLayout";
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import InventoryPage from "./pages/InventoryPage";
+import ExpiringSoonPage from "./pages/ExpiringSoonPage";
+import RecipeIdeasPage from "./pages/RecipeIdeasPage";
+import ShoppingListPage from "./pages/ShoppingListPage";
+import ProfilePage from "./pages/ProfilePage";
 import "./App.css";
 
-function App() {
-  const [activeTab, setActiveTab] = useState("inventory");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [groceries, setGroceries] = useState([]);
-  const [loadingGroceries, setLoadingGroceries] = useState(true);
-  const [groceriesError, setGroceriesError] = useState(null);
+// Protected route wrapper — redirects to login if not authenticated
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
 
-  // Fetch actual grocery inventory once at application root level
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#3A8B35",
+        color: "#fff",
+        fontSize: "18px",
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
-    fetch("http://localhost:5000/api/groceries", { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status} (${response.statusText})`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (isMounted) {
-          setGroceries(Array.isArray(data) ? data : []);
-          setLoadingGroceries(false);
-        }
-      })
-      .catch((err) => {
-        if (isMounted && err.name !== "AbortError") {
-          setGroceriesError(
-            err.message || "Failed to connect to the server. Please ensure the backend is running."
-          );
-          setLoadingGroceries(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [refreshKey]);
-
-  // Handler for retry button
-  const handleRetryGroceries = useCallback(() => {
-    setLoadingGroceries(true);
-    setGroceriesError(null);
-    setRefreshKey((prev) => prev + 1);
-  }, []);
-
-  // Compute live expiring count directly from real inventory
-  const expiringCount = useMemo(() => {
-    if (!Array.isArray(groceries)) return 0;
-    return groceries.filter((item) => isExpiringSoon(item.expiryDate)).length;
-  }, [groceries]);
-
-  const handleAddItem = () => {
-    setEditingItem(null);
-    setIsAddModalOpen(true);
-  };
-
-  const handleEditItem = (item) => {
-    setEditingItem(item);
-    setIsAddModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsAddModalOpen(false);
-    setEditingItem(null);
-  };
-
-  const handleGrocerySaved = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
-
-  const handleGroceryDeleted = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
-
-  return (
-    <div className="app-container">
-      <Navbar
-        activeTab={activeTab}
-        onTabChange={(tab) => setActiveTab(tab)}
-        onAddItem={handleAddItem}
-        onSearch={setSearchQuery}
-        searchQuery={searchQuery}
-        expiringCount={expiringCount}
-      />
-
-      <main className="main-content">
-        {activeTab === "recipes" ? (
-          <RecipeIdeas
-            onTabChange={setActiveTab}
-            onAddItem={handleAddItem}
-            groceries={groceries}
-            loadingGroceries={loadingGroceries}
-            groceriesError={groceriesError}
-            onRetryPantry={handleRetryGroceries}
-          />
-        ) : activeTab === "shopping" ? (
-          <ShoppingList onTabChange={setActiveTab} />
-        ) : (
-          <Dashboard
-            refreshKey={refreshKey}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onEdit={handleEditItem}
-            onDeleteSuccess={handleGroceryDeleted}
-            groceries={groceries}
-            loading={loadingGroceries}
-            error={groceriesError}
-            onRetry={handleRetryGroceries}
-          />
-        )}
-      </main>
-
-      <AddGroceryForm
-        key={isAddModalOpen ? (editingItem?._id || "new-item-form") : "closed-form"}
-        isOpen={isAddModalOpen}
-        onClose={handleCloseModal}
-        onSuccess={handleGrocerySaved}
-        itemToEdit={editingItem}
-      />
-    </div>
-  );
+  return user ? children : <Navigate to="/login" replace />;
 }
 
-export default App;
+// Guest route — redirects to app if already logged in
+function GuestRoute({ children }) {
+  const { user, loading } = useAuth();
 
+  if (loading) return null;
+
+  return user ? <Navigate to="/app/inventory" replace /> : children;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public Pages */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Auth Pages — only for guests */}
+          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
+
+          {/* Protected App Shell */}
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <PantryProvider>
+                  <AppLayout />
+                </PantryProvider>
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/app/inventory" replace />} />
+            <Route path="inventory" element={<InventoryPage />} />
+            <Route path="expiring" element={<ExpiringSoonPage />} />
+            <Route path="recipes" element={<RecipeIdeasPage />} />
+            <Route path="shopping-list" element={<ShoppingListPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}

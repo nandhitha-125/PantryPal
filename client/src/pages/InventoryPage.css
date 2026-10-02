@@ -1,0 +1,434 @@
+/* ==========================================================================
+   Inventory Page Styles — Green Ombre Dark Theme
+   ========================================================================== */
+
+.inventory-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   1. Page Header
+   -------------------------------------------------------------------------- */
+.inventory-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+}
+
+.inventory-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inventory-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.inventory-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   2. Summary Metrics Strip
+   -------------------------------------------------------------------------- */
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.metric-box {
+  background: rgba(0, 0, 0, 0.20);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(16px);
+  animation: popIn 0.4s ease-out both;
+}
+
+.metric-box:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.metric-box:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.metric-box:nth-child(3) {
+  animation-delay: 0.19s;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.metric-box:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.28);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22), 0 0 15px rgba(126, 217, 87, 0.12);
+}
+
+.metric-box.warning-border {
+  border-left: 3px solid var(--color-warning);
+}
+
+.metric-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.metric-sub {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   3. Toolbar: Search & Filter
+   -------------------------------------------------------------------------- */
+.inventory-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  gap: 8px;
+  width: 280px;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(12px);
+}
+
+.toolbar-search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(78, 166, 72, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.toolbar-search svg {
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+}
+
+.toolbar-search input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 13px;
+  color: var(--color-text-main);
+}
+
+.toolbar-search input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.toolbar-search-clear {
+  background: none;
+  border: none;
+  color: var(--color-text-subtle);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.toolbar-category-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.toolbar-category-select {
+  appearance: none;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 32px 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-category-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(78, 166, 72, 0.1);
+}
+
+.toolbar-category-select option {
+  background: #2D7528;
+  color: #FFFFFF;
+}
+
+.select-caret {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  font-size: 12px;
+  color: var(--color-text-subtle);
+}
+
+.btn-clear-filters {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.btn-clear-filters:hover {
+  text-decoration: underline;
+}
+
+.error-banner {
+  padding: 10px 16px;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.error-banner button {
+  font-weight: 600;
+  color: var(--color-danger);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   4. Status & Empty Cards
+   -------------------------------------------------------------------------- */
+.inventory-status-card {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  border-radius: var(--radius-sm);
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
+}
+
+.empty-icon-box {
+  font-size: 36px;
+  margin-bottom: 4px;
+}
+
+.status-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.status-desc {
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  max-width: 440px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Enterprise Table — Glassmorphic Dark
+   -------------------------------------------------------------------------- */
+.table-wrapper {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  animation: popIn 0.5s ease-out both;
+  animation-delay: 0.15s;
+}
+
+.item-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-avatar-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  background: rgba(78, 166, 72, 0.08);
+  border: 1px solid rgba(78, 166, 72, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.item-title-text {
+  font-weight: 600;
+  color: #FFFFFF;
+  font-size: 13.5px;
+}
+
+.category-tag {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.qty-cell {
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.unit-text {
+  font-weight: 400;
+  color: var(--color-text-subtle);
+  font-size: 12px;
+}
+
+.date-cell {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.actions-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Mobile Responsive Cards View
+   -------------------------------------------------------------------------- */
+.mobile-only {
+  display: none;
+}
+
+.mobile-cards-list {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grocery-mobile-card {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-xs);
+  backdrop-filter: blur(16px);
+}
+
+.mobile-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-item-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.mobile-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.mobile-card-qty {
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.mobile-card-actions {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+}
+
+.mobile-card-actions button {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
+
+  .metrics-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-search {
+    width: 100%;
+  }
+}

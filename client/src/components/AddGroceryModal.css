@@ -1,0 +1,284 @@
+/* Add / Edit Grocery Modal Styles — Green + White */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: modalFadeIn 160ms ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-card {
+  background: rgba(30, 85, 25, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal), 0 0 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  animation: modalSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  backdrop-filter: blur(24px);
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.modal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-title {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  letter-spacing: -0.01em;
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: var(--color-text-subtle);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-main);
+}
+
+.modal-error-banner {
+  margin: 16px 24px 0;
+  padding: 10px 14px;
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-dot {
+  font-size: 8px;
+}
+
+.modal-form {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  letter-spacing: 0.01em;
+}
+
+.required-star {
+  color: var(--color-danger);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  color: var(--color-text-main);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(78, 166, 72, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.form-select option {
+  background: #2D7528;
+  color: #FFFFFF;
+}
+
+.form-input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-cancel-modal {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-cancel-modal:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text-main);
+  border-color: var(--color-border-hover);
+}
+
+/* Animated green "Add to Pantry" submit button */
+@keyframes pantryGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(78, 166, 72, 0.25), 0 2px 8px rgba(61, 139, 55, 0.18);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(78, 166, 72, 0), 0 4px 16px rgba(61, 139, 55, 0.22);
+  }
+}
+
+@keyframes pantryShine {
+  0% {
+    background-position: -200% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.btn-pantry-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 28px;
+  background: linear-gradient(135deg, #3D8B37 0%, #4EA648 50%, #6BBF59 100%);
+  background-size: 200% 200%;
+  border: none;
+  border-radius: var(--radius-md);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pantryGlow 2.5s ease-in-out infinite;
+}
+
+.btn-pantry-submit::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.10) 50%,
+      transparent 100%);
+  animation: pantryShine 3s ease-in-out infinite;
+}
+
+.btn-pantry-submit:hover:not(:disabled) {
+  background-position: 100% 50%;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 24px rgba(61, 139, 55, 0.3), 0 0 0 3px rgba(78, 166, 72, 0.15);
+}
+
+.btn-pantry-submit:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-pantry-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  animation: none;
+}
+
+.btn-pantry-submit .btn-spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+@media (max-width: 600px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
